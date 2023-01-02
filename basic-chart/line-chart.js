@@ -25,7 +25,7 @@ async function drawLineChart() {
 
   // wrapper and bound area
   const wrapper = d3
-    .select("#wrapper")
+    .select("#line-chart")
     .append("svg")
     .attr("width", dimensions.width)
     .attr("height", dimensions.height);
