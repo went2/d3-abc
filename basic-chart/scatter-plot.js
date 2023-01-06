@@ -1,5 +1,5 @@
 async function drawScatterPlot() {
-  const dataset = await d3.json("./data/my_weather_data.json");
+  const dataset = await d3.json("../data/my_weather_data.json");
 
   const width = d3.min([window.innerWidth * 0.8, window.innerHeight * 0.8]);
   const dimensions = {

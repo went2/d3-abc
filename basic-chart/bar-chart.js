@@ -1,5 +1,5 @@
 async function drawBarChart() {
-  const dataset = await d3.json("./data/my_weather_data.json");
+  const dataset = await d3.json("../data/my_weather_data.json");
 
   const width = 400;
   const dimensions = {
