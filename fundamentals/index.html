@@ -11,7 +11,7 @@
         width: window.innerWidth * 0.8,
         height: 400,
         margin: {
-          top: 10,
+          top: 20,
           right: 20,
           bottom: 50,
           left: 40,
@@ -28,15 +28,12 @@
         const { tweets } = await d3.json("./tweets.json");
         wrapper.html("");
 
-        // 处理数据
-        const datasetMap = d3.group(tweets, (d) => d.user);
-        const dataset = Array.from(datasetMap, ([key, value]) => ({
-          key,
-          value,
+        // 处理数据，增加需要的统计字段：impact，tweetTime
+        const dataset = tweets.map((item) => ({
+          ...item,
+          impact: item.favorites.length + item.retweets.length,
+          tweetTime: new Date(item.timestamp),
         }));
-        dataset.forEach((item) => {
-          item.tweetsCounts = item.value.length;
-        });
 
         const bounds = wrapper
           .append("svg")
@@ -49,6 +46,37 @@
             "transform",
             `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`
           );
+
+        const maxImpact = d3.max(dataset, (d) => d.impact);
+        const startEnd = d3.extent(dataset, (d) => d.tweetTime);
+        const timeRamp = d3
+          .scaleTime()
+          .domain(startEnd)
+          .range([40, dimensions.boundedWidth - 20]);
+        const yScale = d3
+          .scaleLinear()
+          .domain([0, maxImpact])
+          .range([0, dimensions.boundedHeight - 20]);
+        const radiusScale = d3
+          .scaleLinear()
+          .domain([0, maxImpact])
+          .range([1, 20]);
+        const colorScale = d3
+          .scaleLinear()
+          .domain([0, maxImpact])
+          .range(["white", "#75739F"]);
+
+        const rect = bounds
+          .selectAll("circle")
+          .data(dataset)
+          .enter()
+          .append("circle")
+          .attr("r", (d) => radiusScale(d.impact))
+          .attr("cx", (d) => timeRamp(d.tweetTime))
+          .attr("cy", (d) => dimensions.boundedHeight - yScale(d.impact))
+          .style("fill", (d) => colorScale(d.impact))
+          .style("stroke", "black")
+          .style("stroke-width", "2px");
       }
       drawScatterplot();
     </script>
