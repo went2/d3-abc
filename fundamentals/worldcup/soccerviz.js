@@ -88,4 +88,16 @@ async function createSoccerViz() {
       .attr("y", 30);
   });
   teamG.select("text").style("pointer-events", "none");
+
+  // external resources
+  d3.text("./infobox.html").then((html) => {
+    d3.select("body").append("div").attr("id", "infobox").html(html);
+  });
+
+  teamG.on("click", function (e, d) {
+    const values = Object.values(d);
+    d3.selectAll("td.data")
+      .data(values)
+      .html((p) => p);
+  });
 }
