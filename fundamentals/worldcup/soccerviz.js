@@ -89,7 +89,7 @@ async function createSoccerViz() {
   });
   teamG.select("text").style("pointer-events", "none");
 
-  // external resources
+  // external resources: html
   d3.text("./infobox.html").then((html) => {
     d3.select("body").append("div").attr("id", "infobox").html(html);
   });
@@ -99,5 +99,35 @@ async function createSoccerViz() {
     d3.selectAll("td.data")
       .data(values)
       .html((p) => p);
+  });
+
+  // external resources: svg
+  d3.html("./icon.svg").then((svgData) => {
+    d3.selectAll("g").each(function () {
+      const gParent = this;
+      d3.select(svgData)
+        .selectAll("path")
+        .each(function () {
+          gParent.appendChild(this.cloneNode(true));
+        });
+    });
+
+    // binding data
+    d3.selectAll("g.overallG").each(function (d) {
+      d3.select(this).selectAll("path").datum(d);
+    });
+    const fourColorScale = d3
+      .scaleOrdinal()
+      .domain(["UEFA", "CONMEBOL", "CONCACAF", "AFC"])
+      .range(["#5eafc6", "#FE9922", "#93C464", "#fcbc34"]);
+
+    d3.selectAll("path")
+      .style("fill", (d) => {
+        if (d) {
+          return fourColorScale(d.region);
+        }
+      })
+      .style("stroke", "black")
+      .style("stroke-width", "1px");
   });
 }
