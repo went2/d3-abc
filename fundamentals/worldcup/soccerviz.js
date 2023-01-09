@@ -56,12 +56,18 @@ async function createSoccerViz() {
     const minAndMax = d3.extent(dataset, (d) => d[datum]);
     const radiusScale = d3.scaleLinear().domain(minAndMax).range([2, 20]);
 
+    const colorQuantize = d3
+      .scaleQuantize()
+      .domain(minAndMax)
+      .range(colorbrewer.Reds[3]);
+
     d3.selectAll("g.overallG")
       .select("circle")
       .transition()
       .delay(250)
       .duration(600)
-      .attr("r", (d) => radiusScale(d[datum]));
+      .attr("r", (d) => radiusScale(d[datum]))
+      .style("fill", (d) => colorQuantize(d[datum]));
   }
 
   teamG.on("mouseover", function (event, datum) {
@@ -81,4 +87,5 @@ async function createSoccerViz() {
       .classed("active", false)
       .attr("y", 30);
   });
+  teamG.select("text").style("pointer-events", "none");
 }
