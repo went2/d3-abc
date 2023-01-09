@@ -24,7 +24,16 @@ async function createSoccerViz() {
     .append("g")
     .attr("class", "overallG")
     .attr("transform", (d, i) => `translate(${i * 50}, 0)`);
-  teamG.append("circle").attr("r", 18);
+  teamG
+    .append("circle")
+    .attr("r", 0)
+    .transition()
+    .delay((d, i) => i * 100)
+    .duration(500)
+    .attr("r", 35)
+    .transition()
+    .duration(500)
+    .attr("r", 18);
   teamG
     .append("text")
     .attr("y", 30)
@@ -34,6 +43,8 @@ async function createSoccerViz() {
     (key) => typeof dataset[0][key] !== "string"
   );
 
+  // interactive
+  const circles = d3.selectAll("g.overallG").select("circle");
   d3.select("#controls")
     .selectAll("button.teams")
     .data(dataKeys)
@@ -48,6 +59,21 @@ async function createSoccerViz() {
 
     d3.selectAll("g.overallG")
       .select("circle")
+      .transition()
+      .delay(250)
+      .duration(600)
       .attr("r", (d) => radiusScale(d[datum]));
   }
+
+  teamG.on("mouseover", function (event, datum) {
+    circles.attr("class", (d) =>
+      d.region === datum.region ? "active" : "inactive"
+    );
+  });
+  teamG.on("mouseout", function (event, datum) {
+    d3.selectAll("g.overallG")
+      .select("circle")
+      .classed("inactive", false)
+      .classed("active", false);
+  });
 }
