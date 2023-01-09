@@ -53,7 +53,6 @@ async function createSoccerViz() {
     .html((d) => d)
     .on("click", buttonClick);
   function buttonClick(event, datum) {
-    console.log(datum);
     const minAndMax = d3.extent(dataset, (d) => d[datum]);
     const radiusScale = d3.scaleLinear().domain(minAndMax).range([2, 20]);
 
@@ -66,14 +65,20 @@ async function createSoccerViz() {
   }
 
   teamG.on("mouseover", function (event, datum) {
-    circles.attr("class", (d) =>
-      d.region === datum.region ? "active" : "inactive"
-    );
+    d3.select(this).select("text").classed("active", true).attr("y", 10);
+
+    circles.each(function (d) {
+      d.region === datum.region
+        ? d3.select(this).classed("active", true)
+        : d3.select(this).classed("inactive", true);
+    });
+    this.parentElement.appendChild(this);
   });
   teamG.on("mouseout", function (event, datum) {
+    d3.selectAll("g.overallG").select("circle").attr("class", "");
     d3.selectAll("g.overallG")
-      .select("circle")
-      .classed("inactive", false)
-      .classed("active", false);
+      .select("text")
+      .classed("active", false)
+      .attr("y", 30);
   });
 }
