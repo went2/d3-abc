@@ -1,4 +1,4 @@
-async function drawBoxplot() {
+async function drawBoxplotChart() {
   let dataset = await d3.csv("./boxplots.csv");
   dataset = dataset.map((item) => {
     Object.keys(item).forEach((key) => {
@@ -22,6 +22,8 @@ async function drawBoxplot() {
 
   // draw circle
   drawCircle(dataset, xScale, yScale);
+
+  drawBoxplot(dataset, xScale, yScale);
 }
 
 function drawAxis(xScale, yScale, tickSize = 470) {
@@ -56,4 +58,32 @@ function drawCircle(dataset, xScale, yScale) {
     .style("fill", "darkgrey");
 }
 
-drawBoxplot();
+function drawBoxplot(dataset, xScale, yScale) {
+  d3.select("svg")
+    .selectAll("g.box")
+    .data(dataset)
+    .enter()
+    .append("g")
+    .attr(
+      "transform",
+      (d) => `translate(${xScale(d.day)}, ${yScale(d.median)})`
+    )
+    .each(function (d, i) {
+      // 使用 each 用于处理复杂的绘图
+      // this 指向 <g> element
+      d3.select(this)
+        .append("rect")
+        .attr("width", 20)
+        .attr("height", yScale(d.q1) - yScale(d.q3))
+        .style("fill", "white")
+        .style("stroke", "black")
+
+        .transition()
+        .duration(1500)
+        .attr("x", -10)
+        .attr("y", yScale(d.q3) - yScale(d.median));
+      // .attr("y", yScale(d.median) - yScale(d.q1));
+    });
+}
+
+drawBoxplotChart();
