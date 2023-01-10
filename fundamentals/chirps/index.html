@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<head>
+  <title>Chirps</title>
+</head>
+<body>
+  <div id="wrapper"></div>
+  <script src="../../lib/d3.min.js"></script>
+  <script>
+    async function drawScatterPlot() {
+      let dataset = await d3.csv("./chirps.csv");
+      dataset = dataset.map((item) => {
+        Object.keys(item).forEach((key) => {
+          item[key] = Number(item[key]);
+        });
+        return item;
+      });
+      console.log(dataset);
+
+      const dimensions = {
+        width: 500,
+        height: 500,
+        margin: {
+          top: 20,
+          right: 20,
+          left: 20,
+          bottom: 40,
+        },
+      };
+      dimensions.boundedWidth =
+        dimensions.width - dimensions.margin.left - dimensions.margin.right;
+      dimensions.boundedHeight =
+        dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
+
+      const wrapper = d3
+        .select("#wrapper")
+        .append("svg")
+        .attr("width", dimensions.width)
+        .attr("height", dimensions.height);
+      const bounds = wrapper
+        .append("g")
+        .attr("width", dimensions.boundedWidth)
+        .attr("height", dimensions.boundedHeight)
+        .style(
+          "transform",
+          `translate(${dimensions.margin.left}, ${dimensions.margin.top})`
+        );
+
+      // scales
+
+      const xScale = d3
+        .scaleLinear()
+        .domain(d3.extent(dataset, (d) => d.temperature))
+        .range([15, dimensions.boundedWidth]);
+      const yScale = d3
+        .scaleLinear()
+        .domain(d3.extent(dataset, (d) => d.chirps))
+        .range([15, dimensions.boundedHeight]);
+      const radiusScale = d3
+        .scaleLinear()
+        .domain(d3.extent(dataset, (d) => d.totalCricket))
+        .range([2, 14]);
+
+      const scatter = bounds
+        .selectAll("circle")
+        .data(dataset)
+        .enter()
+        .append("circle")
+        .attr("r", (d) => radiusScale(d.totalCricket))
+        .attr("cx", (d) => xScale(d.temperature))
+        .attr("cy", (d) => yScale(d.chirps));
+
+      // axis
+      const xAxis = d3
+        .axisBottom()
+        .scale(xScale)
+        .tickSize(dimensions.height - 20)
+        .ticks(5);
+      const yAxis = d3
+        .axisRight()
+        .scale(yScale)
+        .tickSize(dimensions.width - 20)
+        .ticks(6);
+      wrapper.append("g").attr("id", "xAxis").call(xAxis);
+      wrapper.append("g").attr("id", "yAxis").call(yAxis);
+    }
+    drawScatterPlot();
+  </script>
+</body>
