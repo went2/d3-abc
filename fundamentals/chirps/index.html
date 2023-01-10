@@ -46,7 +46,6 @@
         );
 
       // scales
-
       const xScale = d3
         .scaleLinear()
         .domain(d3.extent(dataset, (d) => d.temperature))
@@ -60,15 +59,6 @@
         .domain(d3.extent(dataset, (d) => d.totalCricket))
         .range([2, 14]);
 
-      const scatter = bounds
-        .selectAll("circle")
-        .data(dataset)
-        .enter()
-        .append("circle")
-        .attr("r", (d) => radiusScale(d.totalCricket))
-        .attr("cx", (d) => xScale(d.temperature))
-        .attr("cy", (d) => yScale(d.chirps));
-
       // axis
       const xAxis = d3
         .axisBottom()
@@ -80,8 +70,22 @@
         .scale(yScale)
         .tickSize(dimensions.width - 20)
         .ticks(6);
-      wrapper.append("g").attr("id", "xAxis").call(xAxis);
+      wrapper
+        .append("g")
+        // .attr("transform", `translate(${dimensions.boundedWidth}, 0)`)
+        .attr("id", "xAxis")
+        .call(xAxis);
       wrapper.append("g").attr("id", "yAxis").call(yAxis);
+
+      // draw data
+      const scatter = bounds
+        .selectAll("circle")
+        .data(dataset)
+        .enter()
+        .append("circle")
+        .attr("r", (d) => radiusScale(d.totalCricket))
+        .attr("cx", (d) => xScale(d.temperature))
+        .attr("cy", (d) => yScale(d.chirps));
     }
     drawScatterPlot();
   </script>
