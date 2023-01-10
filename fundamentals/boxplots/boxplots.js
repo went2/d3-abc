@@ -20,9 +20,7 @@ async function drawBoxplotChart() {
   // axis
   drawAxis(xScale, yScale, tickSize);
 
-  // draw circle
-  drawCircle(dataset, xScale, yScale);
-
+  // 绘制箱须图
   drawBoxplot(dataset, xScale, yScale);
 }
 
@@ -43,6 +41,7 @@ function drawAxis(xScale, yScale, tickSize = 470) {
     .attr("transform", `translate(0, ${tickSize + 10})`)
     .attr("id", "xAxisG")
     .call(xAxis);
+  d3.select("#xAxisG > path.domain").style("display", "none");
 }
 
 function drawCircle(dataset, xScale, yScale) {
@@ -69,20 +68,60 @@ function drawBoxplot(dataset, xScale, yScale) {
       (d) => `translate(${xScale(d.day)}, ${yScale(d.median)})`
     )
     .each(function (d, i) {
-      // 使用 each 用于处理复杂的绘图
-      // this 指向 <g> element
+      // 开始绘制箱须图
+      // this 指向 <g> element，此时<g>已经在目标位置
+      d3.select(this)
+        .append("line")
+        .attr("class", "range")
+        .attr("x1", 0)
+        .attr("x2", 0)
+        .attr("y1", (d) => yScale(d.max) - yScale(d.median))
+        .attr("y2", (d) => yScale(d.min) - yScale(d.median))
+        .style("stroke", "black")
+        .style("stroke-width", "4px");
+
+      // 最大端点
+      d3.select(this)
+        .append("line")
+        .attr("class", "max")
+        .attr("x1", -10)
+        .attr("x2", 10)
+        .attr("y1", (d) => yScale(d.max) - yScale(d.median))
+        .attr("y2", (d) => yScale(d.max) - yScale(d.median))
+        .style("stroke", "black")
+        .style("stroke-width", "4px");
+
+      // 最小端点
+      d3.select(this)
+        .append("line")
+        .attr("class", "min")
+        .attr("x1", -10)
+        .attr("x2", 10)
+        .attr("y1", (d) => yScale(d.min) - yScale(d.median))
+        .attr("y2", (d) => yScale(d.min) - yScale(d.median))
+        .style("stroke", "black")
+        .style("stroke-width", "4px");
+
       d3.select(this)
         .append("rect")
+        .attr("class", "range")
         .attr("width", 20)
         .attr("height", yScale(d.q1) - yScale(d.q3))
-        .style("fill", "white")
-        .style("stroke", "black")
-
-        .transition()
-        .duration(1500)
         .attr("x", -10)
-        .attr("y", yScale(d.q3) - yScale(d.median));
-      // .attr("y", yScale(d.median) - yScale(d.q1));
+        .attr("y", (d) => yScale(d.q3) - yScale(d.median))
+        .attr("fill", "white")
+        .style("stroke", "black")
+        .style("stroke-width", "2px");
+
+      // 中位线
+      d3.select(this)
+        .append("line")
+        .attr("x1", -10)
+        .attr("x2", 10)
+        .attr("y1", 0)
+        .attr("y2", 0)
+        .style("stroke", "darkgrey")
+        .style("stroke-width", "4px");
     });
 }
 
