@@ -77,6 +77,22 @@ function drawLines(xScale, yScale, dataset) {
     .line()
     .x((d) => xScale(d.day))
     .y((d) => yScale(d.tweets));
+  tweetsLine.curve(d3.curveCardinal);
+
+  const retweetsLine = d3
+    .line()
+    .x((d) => xScale(d.day))
+    .y((d) => yScale(d.retweets));
+
+  retweetsLine.curve(d3.curveStep);
+
+  const favoritesLine = d3
+    .line()
+    .x((d) => xScale(d.day))
+    .y((d) => yScale(d.favorites));
+
+  favoritesLine.curve(d3.curveCardinal);
+
   d3.select("svg")
     .append("path")
     .attr("d", tweetsLine(dataset))
@@ -84,10 +100,6 @@ function drawLines(xScale, yScale, dataset) {
     .attr("stroke", "#5eaec5")
     .attr("stroke-width", 2);
 
-  const retweetsLine = d3
-    .line()
-    .x((d) => xScale(d.day))
-    .y((d) => yScale(d.retweets));
   d3.select("svg")
     .append("path")
     .attr("d", retweetsLine(dataset))
@@ -95,10 +107,6 @@ function drawLines(xScale, yScale, dataset) {
     .attr("stroke", "#92c463")
     .attr("stroke-width", 2);
 
-  const favoritesLine = d3
-    .line()
-    .x((d) => xScale(d.day))
-    .y((d) => yScale(d.favorites));
   d3.select("svg")
     .append("path")
     .attr("d", favoritesLine(dataset))
