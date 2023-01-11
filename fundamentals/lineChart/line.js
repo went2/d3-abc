@@ -17,6 +17,7 @@ async function drawLineChart() {
 
   drawAxis(xScale, yScale);
   drawCircles(xScale, yScale, dataset);
+  drawLines(xScale, yScale, dataset);
 }
 
 function drawAxis(xScale, yScale) {
@@ -69,6 +70,41 @@ function drawCircles(xScale, yScale, dataset) {
     .attr("cx", (d) => xScale(dayAssessor(d)))
     .attr("cy", (d) => yScale(d.favorites))
     .style("fill", "#fe9a22");
+}
+
+function drawLines(xScale, yScale, dataset) {
+  const tweetsLine = d3
+    .line()
+    .x((d) => xScale(d.day))
+    .y((d) => yScale(d.tweets));
+  d3.select("svg")
+    .append("path")
+    .attr("d", tweetsLine(dataset))
+    .attr("fill", "none")
+    .attr("stroke", "#5eaec5")
+    .attr("stroke-width", 2);
+
+  const retweetsLine = d3
+    .line()
+    .x((d) => xScale(d.day))
+    .y((d) => yScale(d.retweets));
+  d3.select("svg")
+    .append("path")
+    .attr("d", retweetsLine(dataset))
+    .attr("fill", "none")
+    .attr("stroke", "#92c463")
+    .attr("stroke-width", 2);
+
+  const favoritesLine = d3
+    .line()
+    .x((d) => xScale(d.day))
+    .y((d) => yScale(d.favorites));
+  d3.select("svg")
+    .append("path")
+    .attr("d", favoritesLine(dataset))
+    .attr("fill", "none")
+    .attr("stroke", "#fe9a22")
+    .attr("stroke-width", 2);
 }
 
 drawLineChart();
