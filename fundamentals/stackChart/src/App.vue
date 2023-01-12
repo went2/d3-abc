@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import * as d3 from "d3";
+import { legendColor } from "d3-svg-legend";
 
 const movieData = ref([]);
 const dataColumn = ref([]);
 const movieAreaArray = ref([]); // area generator 函数组成的数组
 
-const xScale = d3.scaleLinear().domain([1, 8]).range([20, 470]);
-const yScale = d3.scaleLinear().domain([0, 40]).range([480, 20]);
+const xScale = d3.scaleLinear().domain([1, 10]).range([20, 470]);
+const yScale = d3.scaleLinear().domain([0, 55]).range([480, 20]);
 const fillScale = d3
   .scaleOrdinal()
   .domain(["titanic", "avatar", "akira", "frozen", "deliverance", "avengers"])
@@ -44,6 +45,12 @@ onMounted(() => {
     d3.select("#xAxisG > path.domain").style("display", "none");
     d3.select("#yAxisG > path.domain").style("display", "none");
   })(xScale, yScale);
+
+  // add legend
+  d3.select("svg")
+    .append("g")
+    .attr("transform", "translate(500, 0)")
+    .call(legendA);
 });
 
 function stackingFunc(lineData, lineKey) {
@@ -59,6 +66,10 @@ function stackingFunc(lineData, lineKey) {
   return newHeight;
 }
 
+// legend setting
+const legendA = legendColor().scale(fillScale);
+// legendA.orient("horizontal").shapePadding(60).shapeWidth(12).shapeHeight(30);
+
 d3.csv("/movies.csv").then((data) => {
   dataColumn.value = data.columns.filter((item) => item !== "day");
 
@@ -72,7 +83,7 @@ d3.csv("/movies.csv").then((data) => {
 </script>
 
 <template>
-  <svg id="svg" width="500px" height="500px">
+  <svg id="svg" width="1000px" height="600px">
     <template v-for="(fn, i) in movieAreaArray" :key="dataColumn[i]">
       <path
         :id="dataColumn[i]"
