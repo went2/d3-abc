@@ -7,6 +7,17 @@ const movieData = ref([]);
 const dataColumn = ref([]);
 const movieAreaArray = ref([]); // area generator 函数组成的数组
 
+d3.csv("/movies.csv").then((data) => {
+  dataColumn.value = data.columns.filter((item) => item !== "day");
+
+  movieData.value = data.map((item) => {
+    Object.keys(item).forEach((key) => {
+      item[key] = Number(item[key]);
+    });
+    return item;
+  });
+});
+
 const xScale = d3.scaleLinear().domain([1, 10]).range([20, 470]);
 const yScale = d3.scaleLinear().domain([0, 55]).range([480, 20]);
 const fillScale = d3
@@ -68,18 +79,6 @@ function stackingFunc(lineData, lineKey) {
 
 // legend setting
 const legendA = legendColor().scale(fillScale);
-// legendA.orient("horizontal").shapePadding(60).shapeWidth(12).shapeHeight(30);
-
-d3.csv("/movies.csv").then((data) => {
-  dataColumn.value = data.columns.filter((item) => item !== "day");
-
-  movieData.value = data.map((item) => {
-    Object.keys(item).forEach((key) => {
-      item[key] = Number(item[key]);
-    });
-    return item;
-  });
-});
 </script>
 
 <template>
