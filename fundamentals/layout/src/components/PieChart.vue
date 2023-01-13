@@ -3,14 +3,8 @@ import * as d3 from "d3";
 import { onMounted, ref } from "vue";
 
 const tweetsData = ref([]);
-const metrics = {
-  Tweets: "numTweets",
-  Favortites: "numFavorites",
-  Retweets: "numRetweets",
-};
 
 const pieGenerator = d3.pie();
-pieGenerator.sort(null);
 
 const arcGenerator = d3.arc();
 arcGenerator.innerRadius(20).outerRadius(100);
@@ -27,25 +21,34 @@ onMounted(() => {
       key,
       value,
     }));
+
     tweetsData.value.forEach((d) => {
       d.numTweets = d.value.length;
       d.numFavorites = d3.sum(d.value, (p) => p.favorites.length);
       d.numRetweets = d3.sum(d.value, (p) => p.retweets.length);
     });
 
-    const pieData = pieGenerator.value((d) => d.numTweets)(tweetsData.value);
-    // console.log(tweetsData.value);
+    pieGenerator.value((d) => d.numTweets).sort(null);
+    const tweetsPie = pieGenerator(tweetsData.value);
+
+    pieGenerator.value((d) => d.numRetweets).sort(null);
+    const retweetsPie = pieGenerator(tweetsData.value);
+
+    tweetsData.value.forEach((d, i) => {
+      d.tweetsSlice = tweetsPie[i];
+      d.retweetsSlice = retweetsPie[i];
+    });
 
     // draw pie chart
     d3.select("svg")
       .append("g")
       .attr("transform", "translate(250, 250)")
       .selectAll("path")
-      .data(pieData)
+      .data(tweetsData.value, (d) => d.key)
       .enter()
       .append("path")
       .style("fill", (d, i) => fillScale(i))
-      .attr("d", arcGenerator)
+      .attr("d", (d) => arcGenerator(d.tweetsSlice))
       .attr("stroke", "black")
       .attr("stroke-width", "2px");
 
@@ -55,27 +58,60 @@ onMounted(() => {
   });
 });
 
-const changeMetric = (data) => {
-  console.log("click", data);
-  const pieData = pieGenerator.value((d) => d[data])(tweetsData.value);
-
+const change = () => {
   // re-draw pie
-  d3.selectAll("path")
-    .data(pieData)
-    .transition()
-    .duration(500)
-    .attr("d", arcGenerator);
+  d3.selectAll("path").transition().duration(500).attrTween("d", arcTween1);
+};
+
+const back = () => {
+  d3.selectAll("path").transition().duration(500).attrTween("d", arcTween2);
+};
+
+const arcTween1 = (d) => {
+  return (t) => {
+    const interpolateStartAngle = d3.interpolate(
+      d.tweetsSlice.startAngle,
+      d.retweetsSlice.startAngle
+    );
+    const interpolateEndAngle = d3.interpolate(
+      d.tweetsSlice.endAngle,
+      d.retweetsSlice.endAngle
+    );
+    d.startAngle = interpolateStartAngle(t);
+    d.endAngle = interpolateEndAngle(t);
+    return arcGenerator(d);
+  };
+};
+
+const arcTween2 = (d) => {
+  return (t) => {
+    const interpolateStartAngle = d3.interpolate(
+      d.retweetsSlice.startAngle,
+      d.tweetsSlice.startAngle
+    );
+    const interpolateEndAngle = d3.interpolate(
+      d.retweetsSlice.endAngle,
+      d.tweetsSlice.endAngle
+    );
+    d.startAngle = interpolateStartAngle(t);
+    d.endAngle = interpolateEndAngle(t);
+    return arcGenerator(d);
+  };
 };
 </script>
 
 <template>
   <div class="controls">
-    <template v-for="(value, key) in metrics">
-      <button @click="changeMetric(value)">{{ key }}</button>
-    </template>
+    <button @click="change">change</button>
+    <button @click="back">back</button>
   </div>
 
   <svg id="svg" width="500px" height="500px"></svg>
 </template>
 
-<style lang="less" scoped></style>
+<style scoped>
+.controls {
+  display: flex;
+  justify-content: center;
+}
+</style>
