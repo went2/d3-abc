@@ -20,6 +20,11 @@ d3.json("/tweets.json").then((data) => {
   console.log("bins", binsData.value);
 });
 
+const HandleClick = () => {
+  binGenerator.value((d) => d.retweets.length);
+  binsData.value = binGenerator(dataset.value);
+};
+
 onMounted(() => {
   const xAxis = d3.axisBottom().scale(xScale).ticks(5);
   d3.select("svg")
@@ -40,6 +45,7 @@ onMounted(() => {
         :width="xScale(d.x1 - d.x0) - 2 > 0 ? xScale(d.x1 - d.x0) - 2 : 0"
         :height="400 - yScale(d.length)"
         :style="{ fill: '#FCD88B' }"
+        @click="HandleClick"
       />
     </template>
   </svg>
