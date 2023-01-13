@@ -7,7 +7,7 @@ const binsData = ref([]);
 const xScale = d3.scaleLinear().domain([0, 5]).range([0, 500]);
 const yScale = d3.scaleLinear().domain([0, 10]).range([400, 0]);
 
-// 配置histogram
+// 配置bin
 const binGenerator = d3.bin();
 binGenerator
   .domain([0, 5])
