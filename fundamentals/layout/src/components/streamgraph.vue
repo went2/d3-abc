@@ -61,7 +61,11 @@ onMounted(() => {
       return item;
     });
     drawAxis();
-    console.log(stackLayout(dataset.value));
+    const stackedData = stackLayout(dataset.value);
+
+    // 经过area 处理的数据长这样：
+    // M0,320L50,336L100,368L150,424L200,448L250,456L300,464L350,480L400,480L450,480L450,480L400,480L350,480L300,480L250,480L200,480L150,480L100,480L50,480L0,480Z
+    // console.log(stackArea(stackedData[0]));
 
     // d3.select("svg")
     //   .selectAll("path")
@@ -98,8 +102,11 @@ onMounted(() => {
           .attr("x", (p, q) => xScale(q))
           .attr("y", (p) => yScale(p[1]))
           .attr("width", 40)
-          .attr("height", (p) => heightScale(p[1] - p[0]))
-          .style("fill", fillScale(d.key));
+          .style("fill", fillScale(d.key))
+          // .transition()
+          // .delay(500)
+          // .duration(3000)
+          .attr("height", (p) => heightScale(p[1] - p[0]));
       });
   });
 });
