@@ -22,7 +22,9 @@ const initSankey = (dataset) => {
 };
 
 onMounted(() => {
-  const bounds = d3.select("#sankeyG");
+  const bounds = d3
+    .select("#sankeyG")
+    .style("transform", "translate(40px,40px)");
 
   d3.json("/sitestate.json").then((data) => {
     dataset.value = data;
@@ -33,7 +35,7 @@ onMounted(() => {
     const intensityRamp = d3
       .scaleLinear()
       .domain([0, d3.max(data.links, (d) => d.value)])
-      .range(["#fcd88b", "#cf7d1c"]);
+      .range(["#fcd89b", "#cf7d1c"]);
 
     console.log(sankeyD.value.nodes);
 
@@ -45,9 +47,16 @@ onMounted(() => {
       .append("path")
       .attr("class", "links")
       .attr("d", sankeyLinkHorizontal())
+      .style("fill", "none")
       .style("stroke-width", (d) => d.width)
-      .style("stroke", (d) => intensityRamp(d.value));
-    // .style("stroke-opacity", 0.5);
+      .style("stroke", (d) => intensityRamp(d.value))
+      .style("stroke-opacity", 0.5)
+      .on("mouseover", function () {
+        d3.select(this).style("stroke-opacity", 0.8);
+      })
+      .on("mouseout", function () {
+        d3.selectAll(".links").style("stroke-opacity", 0.5);
+      });
 
     // d3.selectAll("path.links").style("stroke-opacity", 0.5);
 
@@ -65,14 +74,14 @@ onMounted(() => {
       .attr("x", (d) => d.x0)
       .attr("y", (d) => d.y0)
       .attr("height", (d) => d.y1 - d.y0)
-      .attr("width", 20)
+      .attr("width", (d) => d.x1 - d.x0)
       .style("fill", "#93c464")
       .style("stroke", "gray");
 
     d3.selectAll(".nodes")
       .append("text")
-      .attr("x", 0)
-      // .attr("y", (d) => d.dy / 2)
+      .attr("x", (d) => d.x0)
+      .attr("y", (d) => d.y0 - 10)
       .attr("text-anchor", "middle")
       .style("fill", "black")
       .text((d) => d.name);
@@ -80,8 +89,8 @@ onMounted(() => {
 });
 </script>
 <template>
-  <svg id="svg" width="540px" height="540px">
-    <g style="transform: translate(20, 20)" id="sankeyG"></g>
+  <svg id="svg" width="600px" height="600px">
+    <g id="sankeyG"></g>
   </svg>
 </template>
 
