@@ -42,7 +42,8 @@ const drawSankey = (
   // 去重，然后组成[{id: string}]的nodes数组
   if (nodes === undefined) {
     nodes = Array.from(d3.union(LS, LT), (id) => ({ id }));
-    console.log("nodes1", nodes);
+    // console.log(JSON.stringify(nodes));
+    // console.log("nodes1", nodes);
   }
   const N = d3.map(nodes, nodeId);
 
@@ -56,6 +57,7 @@ const drawSankey = (
     target: LT[i],
     value: LV[i],
   }));
+  console.log(JSON.stringify(links));
 
   const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup);
 
