@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+  <title>Sankey</title>
+  <script src="../../lib/d3.min.js"></script>
+  <!-- <script type="module" src="./lib/index.js"></script> -->
+</head>
+<body>
+  <div>
+    <svg id="svg"></svg>
+  </div>
+  <script type="module">
+    import { sankey } from "./lib/index.js";
+    sankey()
+      .nodeId((d) => d.id)
+      .nodeWidth(15)
+      .nodePadding(10)
+      .iterations(1)
+      .extent([500, 500]);
+
+    // return { nodes: Array, links: Array }
+    function formatData({ nodes, links }) {
+      const linkSourceArr = links.map((item) => item.source);
+      const linkTargetArr = links.map((item) => item.target);
+
+      // 如果没有nodes的话，从links数组中拿到所有的source 和 target 的值
+      // 去重，然后组成nodes数组 [{id: string}]
+      if (nodes === undefined) {
+        nodes = Array.from(d3.union(linkSourceArr, linkTargetArr), (id) => ({
+          id,
+        }));
+        // console.log("nodes", nodes);
+      }
+
+      // sankey({ nodes, links });
+      mySankey({ nodes, links });
+    }
+
+    function mySankey({ nodes, links }) {
+      const graph = clone({ nodes, links });
+      computeNodeLinks(graph);
+    }
+
+    d3.json("./energy.json").then((data) => {
+      // console.log(data);
+      // sankey(data);
+      const links = data;
+      const dataset = formatData({ links });
+    });
+  </script>
+</body>

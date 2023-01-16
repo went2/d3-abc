@@ -7,7 +7,7 @@ import Streamgraph from "./components/Streamgraph.vue";
 import Sankey from "./components/Sankey.vue";
 import Controls from "./components/Controls.vue";
 
-import energyData from "./assets/energyData.json";
+import * as energyData from "./assets/energyData.json";
 // console.log(eneryData);
 </script>
 

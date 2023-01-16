@@ -44,14 +44,6 @@ onMounted(() => {
     }));
 
     // console.log("nodes", nodes);
-    const el = SankeyChart(
-      { links, nodes },
-      {
-        linkColor: "target",
-        width: 640,
-      }
-    );
-    bounds.node().appendChild(el);
     return;
 
     const color = d3.scaleOrdinal(d3.schemeCategory10);
