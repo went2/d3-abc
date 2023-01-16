@@ -26,8 +26,8 @@ onMounted(() => {
     const sankey = d3Sankey
       .sankey()
       .nodeId((d: any) => d.name)
-      .nodeWidth(36)
-      .nodePadding(40)
+      .nodeWidth(25)
+      .nodePadding(50)
       .size([boundedWidth, boundedHeight]);
 
     const graphData = sankey(data);
@@ -50,7 +50,6 @@ onMounted(() => {
       .append("path")
       .attr("class", "link")
       .attr("d", d3Sankey.sankeyLinkHorizontal())
-      .style("fill", "none")
       .style("stroke-width", (d) => d.width)
       .style("stroke", "#000")
       .style("stroke-opcacity", 0.5);
@@ -64,8 +63,11 @@ onMounted(() => {
       .selectAll(".node")
       .data(graphData.nodes)
       .enter()
+      .append("g")
+      .attr("class", "node");
+
+    node
       .append("rect")
-      .attr("class", "node")
       .attr("x", (d) => d.x0)
       .attr("y", (d) => d.y0)
       .attr("height", (d) => d.y1 - d.y0)
@@ -73,9 +75,9 @@ onMounted(() => {
       .style("fill", (d) => {
         return (d.color = color(d.name.replace(/ .*/, "")));
       })
-      .style("stroke", (d) => d3.rgb(d.color).darker(2));
-
-    node.append("title").text((d) => `${d.name} ${fomatter(d.value)}`);
+      .style("stroke", (d) => d3.rgb(d.color).darker(2))
+      .append("title")
+      .text((d) => `${d.name} ${fomatter(d.value)}`);
 
     // append node text
     node
