@@ -5,7 +5,7 @@ import { onMounted, ref } from "vue";
 import * as d3Sankey from "d3-sankey";
 
 onMounted(() => {
-  d3.json("/sankeySample1.json").then((data) => {
+  d3.json("/sankeySample1.json").then((data: any) => {
     console.log(data);
 
     // margins
@@ -53,7 +53,7 @@ onMounted(() => {
       .style("stroke-width", (d) => d.width)
       .style("stroke", "#000")
       .style("stroke-opcacity", 0.5);
-    link.append("title").text((d) => {
+    link.append("title").text((d: any) => {
       return d.source.name + "->" + d.target.name + "\n" + fomatter(d.value);
     });
 
@@ -66,18 +66,20 @@ onMounted(() => {
       .append("g")
       .attr("class", "node");
 
+    // @ts-ignore
     node
       .append("rect")
       .attr("x", (d) => d.x0)
       .attr("y", (d) => d.y0)
       .attr("height", (d) => d.y1 - d.y0)
       .attr("width", (d) => d.x1 - d.x0)
-      .style("fill", (d) => {
+      .style("fill", (d: any) => {
         return (d.color = color(d.name.replace(/ .*/, "")));
       })
-      .style("stroke", (d) => d3.rgb(d.color).darker(2))
-      .append("title")
-      .text((d) => `${d.name} ${fomatter(d.value)}`);
+      //@ts-ignore
+      .style("stroke", (d: any) => d3.rgb(d.color).darker(2));
+
+    node.append("title").text((d: any) => `${d.name} ${fomatter(d.value)}`);
 
     // append node text
     node
@@ -86,7 +88,7 @@ onMounted(() => {
       .attr("y", (d) => (d.y1 + d.y0) / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", "end")
-      .text((d) => d.name)
+      .text((d: any) => d.name)
       .filter((d) => d.x0 < boundedWidth / 2)
       .attr("x", (d) => d.x1 + 6)
       .attr("text-anchcor", "start");

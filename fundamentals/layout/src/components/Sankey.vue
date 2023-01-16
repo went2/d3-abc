@@ -1,126 +1,74 @@
 <script lang="ts" setup>
 import * as d3 from "d3";
 import { onMounted, ref, computed } from "vue";
-// import { sankey, sankeyLinkHorizontal } from "d3-sankey";
-// import * as d3Sankey from "d3-sankey";
 import * as d3Sankey from "d3-sankey";
 
-const sankeyD = ref(null);
+/**
+ * common setting for a chart
+ */
+
+// margins
+const margin = {
+  top: 10,
+  right: 10,
+  bottom: 10,
+  left: 10,
+};
+const boundedWidth = 900 - margin.left - margin.right;
+const boundedHeight = 300 - margin.top - margin.bottom;
+
+const formatNumber = d3.format(",.0f");
+const fomatter = (d) => formatNumber(d);
 const color = d3.scaleOrdinal(d3.schemeCategory10);
-const props = defineProps({
-  data: Object,
-});
 
-const dataset = computed(() => {
-  return JSON.parse(JSON.stringify(props.data));
-});
-
-const sankey = ref(null);
-sankey.value = d3Sankey
+// init sankey generator
+const sannkey = d3Sankey
   .sankey()
-  .nodeId((d: any) => d.name)
-  .nodeWidth(15)
-  .nodePadding(10)
-  .iterations(1)
-  .size([500, 500])(dataset.value);
+  .nodeWidth(30)
+  .nodePadding(40)
+  .nodeId((d: any) => d.name);
 
 onMounted(() => {
-  console.log("onMounted", sankey.value);
-});
-
-onMounted(() => {
-  const bounds = d3
-    .select("#sankeyG")
-    .style("transform", "translate(40px,40px)");
-
-  d3.json("/energy.json").then((data) => {
-    const links = data;
-
-    // generate nodes
-    const linkSourceArr = links.map((d) => d.source);
-    const linkTargetArr = links.map((d) => d.target);
-    const nodes = Array.from(d3.union(linkSourceArr, linkTargetArr), (id) => ({
-      id,
-    }));
-
-    // console.log("nodes", nodes);
-    return;
-
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-    // console.log(sankeyD.value.nodes);
-
-    // draw links
-    bounds
-      .selectAll(".links")
-      .data(sankeyD.value.links)
-      .enter()
-      .append("path")
-      .attr("class", "links")
-      .attr("d", sankeyLinkHorizontal())
-      // .style("fill", "none")
-      .style("stroke-width", (d) => d.width)
-      .style("stroke-opacity", 0.5)
-      .on("mouseover", function () {
-        d3.select(this).style("stroke-opacity", 0.8);
-      })
-      .on("mouseout", function () {
-        d3.selectAll(".links").style("stroke-opacity", 0.5);
+  d3.json("/sankeySample2.json").then(
+    (data: { nodes: Array<any>; links: Array<any> }) => {
+      data.links.forEach((item) => {
+        item.value = Number(item.value);
       });
+      // draw svg
+      const bounds = d3
+        .select("#sankey-wrapper")
+        .append("svg")
+        .attr("width", boundedWidth + margin.left + margin.right)
+        .attr("height", boundedHeight + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    // draw nodes
-    const node = bounds
-      .selectAll(".node")
-      .data(sankeyD.value.nodes)
-      .enter()
-      .append("g")
-      .attr("class", "node")
-      .style("transform", (d) => `translate(${d.x0}, ${d.y0})`);
+      const graphData = sannkey(data);
+      console.log(graphData);
 
-    node
-      .append("rect")
-      .attr("x", (d) => d.x0)
-      .attr("y", (d) => d.y0)
-      .attr("height", (d) => d.y1 - d.y0)
-      .attr("width", 30)
-      .style("fill", "#93c464")
-      .style("stroke", "gray");
-
-    node
-      .append("text")
-      .attr("x", (d) => d.x0)
-      .attr("y", (d) => d.y0 - 10)
-      .attr("text-anchor", "middle")
-      .style("fill", "black")
-      .text((d) => d.name);
-  });
+      // draw links of sankey
+      const link = bounds
+        .append("g")
+        .selectAll(".link")
+        .data(graphData.links)
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr("d", d3Sankey.sankeyLinkHorizontal())
+        .style("stroke-width", (d) => d.width)
+        .style("stroke", "#000")
+        .style("stroke-opcacity", 0.5);
+      link
+        .append("title")
+        .text(
+          (d: any) => `${d.source.name}->${d.target.name} ${fomatter(d.value)}`
+        );
+    }
+  );
 });
 </script>
 <template>
-  <svg id="svg" width="600px" height="600px">
-    <g>
-      <template v-for="node in sankey.nodes" :key="node.name">
-        <rect
-          :x="node.x0"
-          :y="node.y0"
-          :height="node.y1 - node.y0"
-          :width="node.x1 - node.x0"
-        />
-        <title>{{ node.name }}</title>
-      </template>
-    </g>
-    <g fill="none" :stroke-opacity="0.5">
-      <template v-for="link in sankey.links" :key="link.index">
-        <g class="link">
-          <path
-            :d="d3Sankey.sankeyLinkHorizontal()"
-            :stroke-width="link.width"
-            stroke="black"
-          />
-        </g>
-      </template>
-    </g>
-  </svg>
+  <div id="sankey-wrapper"></div>
 </template>
 
 <style scoped></style>
