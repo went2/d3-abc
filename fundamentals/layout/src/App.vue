@@ -4,11 +4,18 @@ import HistoChart from "./components/HistoChart.vue";
 import ViolinChart from "./components/ViolinChart.vue";
 import PieChart from "./components/PieChart.vue";
 import Streamgraph from "./components/Streamgraph.vue";
-import Sankey2 from "./components/Sankey.vue";
+import Sankey from "./components/Sankey.vue";
+import Controls from "./components/Controls.vue";
+
+import energyData from "./assets/energyData.json";
+// console.log(eneryData);
 </script>
 
 <template>
-  <Sankey2 />
+  <div class="app-wrapper">
+    <Controls />
+    <Sankey :data="energyData" />
+  </div>
 </template>
 
 <style scoped></style>
