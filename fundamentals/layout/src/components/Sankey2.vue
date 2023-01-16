@@ -1,124 +1,99 @@
-<script setup>
+<script lang="ts" setup>
 import * as d3 from "d3";
 import { onMounted, ref } from "vue";
-import { sankey, sankeyLinkHorizontal } from "d3-sankey";
-
-const data = ref([]);
-
-/**
- *
- * @param data {nodes, links}
- * @param options
- */
-const drawSankey = (
-  { nodes, links },
-  {
-    align = "justify",
-    nodeGroup,
-    nodeGroups,
-    nodeAlign = align, // Sankey node alignment strategy: left, right, justify, center
-    nodeWidth = 15, // width of node rects
-    nodePadding = 10, // vertical separation between adjacent nodes,
-    nodeStroke = "currentColor",
-    nodeStrokeOpacity = 0.5,
-    nodeId = (d) => d.id,
-    linkSource = ({ source }) => source, // mapper function, given d in links, returns a node identifier string
-    linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
-    linkValue = ({ value }) => value, // given d in links, returns the quantitative value,
-    colors = d3.schemeTableau10, // array of colors
-    width = 640, // outer width, in pixels
-    height = 400, // outer height, in pixels
-    marginTop = 5, // top margin, in pixels
-    marginRight = 1, // right margin, in pixels
-    marginBottom = 5, // bottom margin, in pixels
-    marginLeft = 1, // left margin, in pixels
-  } = {}
-) => {
-  const LS = d3.map(links, linkSource);
-  const LT = d3.map(links, linkTarget);
-  const LV = d3.map(links, linkValue);
-
-  // 如果没有nodes的话，从links数组中拿到所有的source 和 target 的值
-  // 去重，然后组成[{id: string}]的nodes数组
-  if (nodes === undefined) {
-    nodes = Array.from(d3.union(LS, LT), (id) => ({ id }));
-    // console.log(JSON.stringify(nodes));
-    // console.log("nodes1", nodes);
-  }
-  const N = d3.map(nodes, nodeId);
-
-  // Replace the input nodes and links with mutable objects for the simulation
-  // 重新组合数据，用于被 sankey() 处理
-  // nodes = d3.map(nodes, (_, i) => ({ id: N[i] }));
-
-  // console.log("nodes2", nodes);
-  links = d3.map(links, (_, i) => ({
-    source: LS[i],
-    target: LT[i],
-    value: LV[i],
-  }));
-  console.log(JSON.stringify(links));
-
-  const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup);
-
-  // Compute default domains.
-  if (G && nodeGroups === undefined) nodeGroups = G;
-
-  // Construct the scales.
-  const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
-
-  const sankeyGenerator = sankey()
-    .nodeId(({ index: i }) => N[i])
-    .nodeAlign(nodeAlign)
-    .nodeWidth(nodeWidth)
-    .nodePadding(nodePadding)
-    .extent([
-      [marginLeft, marginTop],
-      [width - marginRight, height - marginBottom],
-    ])({ nodes, links });
-  // sankeyGenerator({ nodes, links });
-
-  const svg = d3
-    .create("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
-
-  const node = svg
-    .append("g")
-    .attr("stroke", nodeStroke)
-    .attr("stroke-width", nodeStrokeWidth)
-    .attr("stroke-opacity", nodeStrokeOpacity)
-    // .attr("stroke-linejoin", nodeStrokeLinejoin);
-    .selectAll("rect")
-    .data(nodes)
-    .join("rect")
-    .attr("x", (d) => d.x0)
-    .attr("y", (d) => d.y0)
-    .attr("width", (d) => d.x1 - d.x0)
-    .attr("height", (d) => d.y1 - d.y0);
-
-  if (G) node.attr("fill", ({ index: i }) => color(G[i]));
-};
+// import { sankey, sankeyLinkHorizontal } from "d3-sankey";
+import * as d3Sankey from "d3-sankey";
 
 onMounted(() => {
-  // data
-  d3.json("/energy.json").then((data) => {
-    // data: Array<{ source: string, target: string, value: number }>
-    const links = data;
-    drawSankey(
-      { links },
-      {
-        nodeGroup: (d) => d.id.split(/\W/)[0], // take first word for color
-      }
-    );
+  d3.json("/sankeySample1.json").then((data) => {
+    console.log(data);
+
+    // margins
+    const margin = {
+      top: 10,
+      right: 10,
+      bottom: 10,
+      left: 10,
+    };
+    const boundedWidth = 900 - margin.left - margin.right;
+    const boundedHeight = 300 - margin.top - margin.bottom;
+
+    const formatNumber = d3.format(",.0f");
+    const fomatter = (d) => formatNumber(d);
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    // init sanky
+    const sankey = d3Sankey
+      .sankey()
+      .nodeId((d: any) => d.name)
+      .nodeWidth(36)
+      .nodePadding(40)
+      .size([boundedWidth, boundedHeight]);
+
+    const graphData = sankey(data);
+
+    // draw svg
+    const bounds = d3
+      .select("#sankey-container")
+      .append("svg")
+      .attr("width", boundedWidth + margin.left + margin.right)
+      .attr("height", boundedHeight + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    // draw links of sankey
+    const link = bounds
+      .append("g")
+      .selectAll(".link")
+      .data(graphData.links)
+      .enter()
+      .append("path")
+      .attr("class", "link")
+      .attr("d", d3Sankey.sankeyLinkHorizontal())
+      .style("fill", "none")
+      .style("stroke-width", (d) => d.width)
+      .style("stroke", "#000")
+      .style("stroke-opcacity", 0.5);
+    link.append("title").text((d) => {
+      return d.source.name + "->" + d.target.name + "\n" + fomatter(d.value);
+    });
+
+    // draw nodes of sankey
+    const node = bounds
+      .append("g")
+      .selectAll(".node")
+      .data(graphData.nodes)
+      .enter()
+      .append("rect")
+      .attr("class", "node")
+      .attr("x", (d) => d.x0)
+      .attr("y", (d) => d.y0)
+      .attr("height", (d) => d.y1 - d.y0)
+      .attr("width", (d) => d.x1 - d.x0)
+      .style("fill", (d) => {
+        return (d.color = color(d.name.replace(/ .*/, "")));
+      })
+      .style("stroke", (d) => d3.rgb(d.color).darker(2));
+
+    node.append("title").text((d) => `${d.name} ${fomatter(d.value)}`);
+
+    // append node text
+    node
+      .append("text")
+      .attr("x", (d) => d.x0 - 6)
+      .attr("y", (d) => (d.y1 + d.y0) / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "end")
+      .text((d) => d.name)
+      .filter((d) => d.x0 < boundedWidth / 2)
+      .attr("x", (d) => d.x1 + 6)
+      .attr("text-anchcor", "start");
   });
 });
 </script>
 
 <template>
-  <div id="sankey"></div>
+  <div id="sankey-container"></div>
 </template>
 
 <style scoped></style>

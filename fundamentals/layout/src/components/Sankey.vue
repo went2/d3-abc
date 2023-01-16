@@ -6,7 +6,7 @@ import { onMounted, ref, computed } from "vue";
 import * as d3Sankey from "d3-sankey";
 
 const sankeyD = ref(null);
-
+const color = d3.scaleOrdinal(d3.schemeCategory10);
 const props = defineProps({
   data: Object,
 });
@@ -60,7 +60,6 @@ onMounted(() => {
       .attr("d", sankeyLinkHorizontal())
       // .style("fill", "none")
       .style("stroke-width", (d) => d.width)
-      .style("stroke", (d) => intensityRamp(d.value))
       .style("stroke-opacity", 0.5)
       .on("mouseover", function () {
         d3.select(this).style("stroke-opacity", 0.8);
@@ -99,15 +98,26 @@ onMounted(() => {
 </script>
 <template>
   <svg id="svg" width="600px" height="600px">
-    <g id="sankeyG">
-      <template v-for="item in sankey.nodes" :key="item.name">
+    <g>
+      <template v-for="node in sankey.nodes" :key="node.name">
         <rect
-          :x="item.x0"
-          :y="item.y0"
-          :height="item.y1 - item.y0"
-          :width="item.x1 - item.x0"
+          :x="node.x0"
+          :y="node.y0"
+          :height="node.y1 - node.y0"
+          :width="node.x1 - node.x0"
         />
-        <title>{{ item.name }}</title>
+        <title>{{ node.name }}</title>
+      </template>
+    </g>
+    <g fill="none" :stroke-opacity="0.5">
+      <template v-for="link in sankey.links" :key="link.index">
+        <g class="link">
+          <path
+            :d="d3Sankey.sankeyLinkHorizontal()"
+            :stroke-width="link.width"
+            stroke="black"
+          />
+        </g>
       </template>
     </g>
   </svg>
