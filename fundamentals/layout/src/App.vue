@@ -6,14 +6,15 @@ import PieChart from "./components/PieChart.vue";
 import Streamgraph from "./components/Streamgraph.vue";
 import Sankey from "./components/Sankey2.vue";
 import Controls from "./components/Controls.vue";
+import WordCloud from "./components/WordCloud.vue";
 
 // import * as energyData from "./assets/energyData.json";
 </script>
 
 <template>
   <div class="app-wrapper">
-    <Controls />
-    <Sankey />
+    <!-- <Controls /> -->
+    <WordCloud />
   </div>
 </template>
 
