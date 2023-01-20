@@ -1,10 +1,10 @@
 import { NodeItem, EdgeItem, MatrixGrid } from "./types";
-import d3 from "../../node_modules/@types/d3";
+import d3 from "d3";
 
-function drawAdjancency() {
+function drawAdjancency(): void {
   Promise.all([
-    d3.csv("../../data/nodelist.csv"),
-    d3.csv("../../data/edgelist.csv"),
+    d3.csv("../../../data/nodelist.csv"),
+    d3.csv("../../../data/edgelist.csv"),
   ]).then((data) => {
     createAdjacencyMatrix(
       data[0] as d3.DSVParsedArray<NodeItem>,

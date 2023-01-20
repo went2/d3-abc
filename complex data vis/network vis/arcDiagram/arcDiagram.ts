@@ -1,0 +1,1 @@
+function drawArcDiagram(): void {}
