@@ -1,5 +1,5 @@
 import { NodeItem, EdgeItem, MatrixGrid } from "./types";
-import d3 from "d3";
+// import d3 from "d3";
 
 function drawAdjancency() {
   Promise.all([
@@ -86,9 +86,12 @@ function createAdjacencyMatrix(
     .style("text-anchor", "end");
 
   // add interactivity
-  d3.selectAll("rect.grid").on("mouseover", function (d: MatrixGrid) {
-    d3.selectAll("rect").style("stroke-width", (p: any) =>
-      p.x === d.x || p.y === d.y ? "4px" : "1px"
-    );
-  });
+  d3.selectAll("rect.grid").on(
+    "mouseover",
+    function (event: MouseEvent, d: any) {
+      d3.selectAll("rect").style("stroke-width", (p: any) =>
+        p.x === d.x || p.y === d.y ? "3px" : "1px"
+      );
+    }
+  );
 }

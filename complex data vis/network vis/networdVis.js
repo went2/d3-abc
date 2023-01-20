@@ -1,5 +1,6 @@
 "use strict";
 exports.__esModule = true;
+// import d3 from "d3";
 function drawAdjancency() {
     Promise.all([
         d3.csv("../../data/nodelist.csv"),
@@ -72,9 +73,9 @@ function createAdjacencyMatrix(nodes, edges) {
         .text(function (d) { return d.id; })
         .style("text-anchor", "end");
     // add interactivity
-    d3.selectAll("rect.grid").on("mouseover", function (d) {
+    d3.selectAll("rect.grid").on("mouseover", function (event, d) {
         d3.selectAll("rect").style("stroke-width", function (p) {
-            return p.x === d.x || p.y === d.y ? "4px" : "1px";
+            return p.x === d.x || p.y === d.y ? "3px" : "1px";
         });
     });
 }
