@@ -1,39 +1,20 @@
 "use strict";
 exports.__esModule = true;
-// import d3 from "d3";
+var d3_1 = require("../../node_modules/@types/d3");
 function drawAdjancency() {
     Promise.all([
-        d3.csv("../../data/nodelist.csv"),
-        d3.csv("../../data/edgelist.csv"),
+        d3_1["default"].csv("../../data/nodelist.csv"),
+        d3_1["default"].csv("../../data/edgelist.csv"),
     ]).then(function (data) {
         createAdjacencyMatrix(data[0], data[1]);
     });
 }
 function createAdjacencyMatrix(nodes, edges) {
     console.log(nodes, edges);
-    var edgeHash = {};
-    edges.forEach(function (edge) {
-        var id = edge.source + "-" + edge.target;
-        edgeHash[id] = edge;
-    });
-    var matrix = [];
-    nodes.forEach(function (source, i) {
-        nodes.forEach(function (target, j) {
-            var grid = {
-                id: source.id + "-" + target.id,
-                x: j,
-                y: i,
-                weight: 0
-            };
-            if (edgeHash[grid.id]) {
-                grid.weight = +edgeHash[grid.id].weight;
-            }
-            matrix.push(grid);
-        });
-    });
+    var matrix = matrixFunc(nodes, edges);
     console.log(matrix);
     // create grid
-    var adjacencyG = d3
+    var adjacencyG = d3_1["default"]
         .select("svg")
         .append("g")
         .attr("transform", "translate(50,50)")
@@ -49,7 +30,7 @@ function createAdjacencyMatrix(nodes, edges) {
         .attr("y", function (d) { return d.y * 25; })
         .style("fill-opacity", function (d) { return d.weight * 0.2; });
     // create horizontal labels
-    var horiLabelG = d3
+    var horiLabelG = d3_1["default"]
         .select("svg")
         .append("g")
         .attr("transform", "translate(50,45)")
@@ -61,7 +42,7 @@ function createAdjacencyMatrix(nodes, edges) {
         .text(function (d) { return d.id; })
         .style("text-anchor", "middle");
     // create vertical labels
-    var verticalLabelG = d3
+    var verticalLabelG = d3_1["default"]
         .select("svg")
         .append("g")
         .attr("transform", "translate(45,50)")
@@ -73,9 +54,36 @@ function createAdjacencyMatrix(nodes, edges) {
         .text(function (d) { return d.id; })
         .style("text-anchor", "end");
     // add interactivity
-    d3.selectAll("rect.grid").on("mouseover", function (event, d) {
-        d3.selectAll("rect").style("stroke-width", function (p) {
+    d3_1["default"].selectAll("rect.grid").on("mouseover", function (event, d) {
+        d3_1["default"].selectAll("rect").style("stroke-width", function (p) {
             return p.x === d.x || p.y === d.y ? "3px" : "1px";
         });
     });
+}
+function matrixFunc(nodes, edges) {
+    //  保存每一个连线的信息
+    var edgeHash = {};
+    edges.forEach(function (edge) {
+        var id = edge.source + "-" + edge.target;
+        edgeHash[id] = edge;
+    });
+    // 构建 matrix 网格数组
+    var matrix = [];
+    nodes.forEach(function (source, i) {
+        // 遍历外层循环第n次，计算的是网格第n列
+        nodes.forEach(function (target, j) {
+            // 遍历内层循环第n次，计算的是网格第n行
+            var grid = {
+                id: source.id + "-" + target.id,
+                x: j,
+                y: i,
+                weight: 0
+            };
+            if (edgeHash[grid.id]) {
+                grid.weight = +edgeHash[grid.id].weight;
+            }
+            matrix.push(grid);
+        });
+    });
+    return matrix;
 }

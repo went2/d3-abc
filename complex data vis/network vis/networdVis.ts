@@ -1,5 +1,5 @@
 import { NodeItem, EdgeItem, MatrixGrid } from "./types";
-// import d3 from "d3";
+import d3 from "../../node_modules/@types/d3";
 
 function drawAdjancency() {
   Promise.all([
@@ -18,27 +18,8 @@ function createAdjacencyMatrix(
   edges: d3.DSVParsedArray<EdgeItem>
 ) {
   console.log(nodes, edges);
-  const edgeHash = {};
-  edges.forEach((edge) => {
-    const id = edge.source + "-" + edge.target;
-    edgeHash[id] = edge;
-  });
 
-  const matrix: MatrixGrid[] = [];
-  nodes.forEach((source, i) => {
-    nodes.forEach((target, j) => {
-      const grid: MatrixGrid = {
-        id: source.id + "-" + target.id,
-        x: j,
-        y: i,
-        weight: 0,
-      };
-      if (edgeHash[grid.id]) {
-        grid.weight = +edgeHash[grid.id].weight;
-      }
-      matrix.push(grid);
-    });
-  });
+  const matrix = matrixFunc(nodes, edges);
 
   console.log(matrix);
 
@@ -94,4 +75,34 @@ function createAdjacencyMatrix(
       );
     }
   );
+}
+
+function matrixFunc(nodes: NodeItem[], edges: EdgeItem[]): MatrixGrid[] {
+  //  保存每一个连线的信息
+  const edgeHash = {};
+  edges.forEach((edge) => {
+    const id = edge.source + "-" + edge.target;
+    edgeHash[id] = edge;
+  });
+
+  // 构建 matrix 网格数组
+  const matrix: MatrixGrid[] = [];
+  nodes.forEach((source, i) => {
+    // 遍历外层循环第n次，计算的是网格第n列
+    nodes.forEach((target, j) => {
+      // 遍历内层循环第n次，计算的是网格第n行
+      const grid: MatrixGrid = {
+        id: source.id + "-" + target.id,
+        x: j,
+        y: i,
+        weight: 0,
+      };
+      if (edgeHash[grid.id]) {
+        grid.weight = +edgeHash[grid.id].weight;
+      }
+      matrix.push(grid);
+    });
+  });
+
+  return matrix;
 }
