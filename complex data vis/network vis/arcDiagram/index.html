@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Arc Diagram</title>
+    <style>
+      .arc {
+        stroke: #9a8b7a;
+        fill: none;
+      }
+      .node {
+        fill: #ebd8c1;
+        stroke: #9a8b7a;
+        stroke-width: 1px;
+      }
+      text {
+        font-size: 8px;
+      }
+      circle.active {
+        fill: #fe9922;
+      }
+      path.active {
+        stroke: #fe9922;
+      }
+      circle.source {
+        fill: #93c464;
+      }
+      circle.target {
+        fill: #41a368;
+      }
+    </style>
+  </head>
+  <body onload="createArcDiagram()">
+    <div>
+      <svg id="svg" style="width: 600px; height: 600px"></svg>
+    </div>
+    <script src="../../../lib/d3.min.js"></script>
+    <script src="./arcDiagram.js"></script>
+  </body>
+</html>

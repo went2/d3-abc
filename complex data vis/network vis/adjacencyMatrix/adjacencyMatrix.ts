@@ -1,4 +1,4 @@
-import { NodeItem, EdgeItem, MatrixGrid } from "./types";
+import { NodeItem, EdgeItem, MatrixGrid } from "../types";
 import d3 from "d3";
 
 function drawAdjancency(): void {
