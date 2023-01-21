@@ -59,7 +59,7 @@ function nodeOver(_, d) {
   d3.selectAll("circle").classed("active", (p) => p === d);
   d3.selectAll("path").classed(
     "active",
-    (p) => p.source === d.source || p.target === d
+    (p: any) => p.source === d.source || p.target === d
   );
 }
 
