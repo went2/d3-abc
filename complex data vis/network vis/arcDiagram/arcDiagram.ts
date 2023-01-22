@@ -1,6 +1,8 @@
 import { NodeItem, EdgeItem } from "../types";
 // import d3 from "d3";
 
+createArcDiagram();
+
 function createArcDiagram(): void {
   const urlArr = ["../../../data/nodelist.csv", "../../../data/edgelist.csv"];
   loadCsvAndDraw(urlArr, draw);
