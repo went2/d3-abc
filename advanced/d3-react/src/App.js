@@ -1,5 +1,6 @@
 import "./App.css";
-import BarChart from "./BarChart";
+import BarChart from "./components/BarChart";
+import WorldMap from "./components/WorldMap";
 
 function App() {
   return (
@@ -8,7 +9,8 @@ function App() {
         <h2>d3-in-action dashboard</h2>
       </header>
       <div>
-        <BarChart data={[5, 10, 1, 3]} size={[500, 500]} />
+        {/* <BarChart data={[5, 10, 1, 3]} size={[500, 500]} /> */}
+        <WorldMap />
       </div>
     </div>
   );

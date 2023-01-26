@@ -11,6 +11,19 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+rect.overlay {
+  opacity: 0;
+}
+rect.selection {
+  fill: #fe9922;
+  opacity: 0.5;
+}
+rect.handle {
+  fill: #fe9922;
+  opacity: 0.25;
+}
+path.countries {
+  stroke-width: 1;
+  stroke: #75739f;
+  fill: #5eafc6;
 }
