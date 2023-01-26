@@ -8,7 +8,7 @@ function createMap() {
     const svg = d3.select("svg");
 
     // drawMercator();
-    drawMollweide();
+
     function drawMercator() {
       const mercatorProj = d3.geoMercator().scale(90).translate([300, 300]);
       const geoPath = d3.geoPath().projection(mercatorProj);
@@ -28,8 +28,20 @@ function createMap() {
         .attr("cx", (d) => mercatorProj([d.x, d.y])[0])
         .attr("cy", (d) => mercatorProj([d.x, d.y])[1]);
     }
-    function drawMollweide() {
-      const projection = d3.geoMollweide().scale(110).translate([300, 300]);
+    const projections = {
+      mollweide: d3.geoMollweide().scale(110).translate([300, 300]),
+      orthographic: d3
+        .geoOrthographic()
+        .scale(200)
+        .translate([300, 300])
+        .center([0, 0]),
+    };
+    drawMap("orthographic");
+    function drawMap(projectionType = "mollweide") {
+      drawCommonMap(projections[projectionType]);
+    }
+
+    function drawCommonMap(projection) {
       const geoPath = d3.geoPath().projection(projection);
       const featureSize = d3.extent(countries.features, (d) => geoPath.area(d));
       const countryColor = d3
@@ -95,8 +107,13 @@ function createMap() {
       }
 
       // 添加zoom
-      const mapZoom = d3.zoom().on("zoom", zoomed);
-      const zoomSettings = d3.zoomIdentity.translate(300, 300).scale(120);
+      const mapZoom = d3.zoom().on("zoom", zoomRotate);
+      const zoomSettings = d3.zoomIdentity.translate(300, 300).scale(200);
+      // 将 transform 的 x 值转为degrees
+      const rotateScale = d3
+        .scaleLinear()
+        .domain([-600, 0, 600])
+        .range([-180, 0, 180]);
       svg.call(mapZoom).call(mapZoom.transform, zoomSettings);
       function zoomed(evt) {
         // console.log("d3.event", evt);
@@ -109,8 +126,50 @@ function createMap() {
           .attr("cx", (d) => projection([d.x, d.y])[0])
           .attr("cy", (d) => projection([d.x, d.y])[1]);
       }
+      function zoomRotate(evt) {
+        const { x, k } = evt.transform;
+        rotateGlobes(x, k);
+      }
 
-      // button event handler
+      let transformX = 0;
+
+      let t = setInterval(() => {
+        rotateGlobes(transformX, 200);
+        transformX += 5;
+      }, 50);
+
+      function rotateGlobes(transformX, transformK) {
+        // 将 x 轴平移的值转为旋转的角度
+        const currentRotate = rotateScale(transformX) % 360;
+        projection.rotate([currentRotate, 0]).scale(transformK);
+
+        // 更新地图的path
+        d3.selectAll("path.graticule").attr("d", geoPath);
+        d3.selectAll("path.countries")
+          .attr("d", geoPath)
+          .style("fill", (d) => countryColor(geoPath.area(d)))
+          .style("stroke", (d) =>
+            d3.rgb(countryColor(geoPath.area(d))).darker()
+          );
+        // return;
+        d3.selectAll("circle.cities").each(function (d, i) {
+          var projectedPoint = projection([+d.x, +d.y]);
+          var x = parseInt(d.x);
+          // 隐藏不在当前view中的点
+          var display =
+            (x + currentRotate < 90 && x + currentRotate > -90) ||
+            (x + currentRotate < -270 && x + currentRotate > -450) ||
+            (x + currentRotate > 270 && x + currentRotate < 450)
+              ? "block"
+              : "none";
+          d3.select(this)
+            .attr("cx", projectedPoint[0])
+            .attr("cy", projectedPoint[1])
+            .style("display", display);
+        });
+      }
+
+      // 使用 button 控制 zoom
       function zoomButton(zoomDirection) {
         const width = 600;
         const height = 600;
