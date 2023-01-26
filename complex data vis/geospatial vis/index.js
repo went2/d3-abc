@@ -53,6 +53,7 @@ function createMap() {
         .attr("cx", (d) => projection([d.x, d.y])[0])
         .attr("cy", (d) => projection([d.x, d.y])[1]);
 
+      // 添加标线
       const graticule = d3.geoGraticule();
       svg
         .insert("path", "path.countries")
@@ -62,7 +63,7 @@ function createMap() {
       svg
         .insert("path", "path.countries")
         .datum(graticule.outline)
-        .attr("class", "graticlue outline")
+        .attr("class", "graticule outline")
         .attr("d", geoPath);
 
       // hover 显示国家的bounds box 和 中心点
@@ -92,6 +93,54 @@ function createMap() {
         d3.selectAll("circle.centroid").remove();
         d3.selectAll("rect.bbox").remove();
       }
+
+      // 添加zoom
+      const mapZoom = d3.zoom().on("zoom", zoomed);
+      const zoomSettings = d3.zoomIdentity.translate(300, 300).scale(120);
+      svg.call(mapZoom).call(mapZoom.transform, zoomSettings);
+      function zoomed(evt) {
+        // console.log("d3.event", evt);
+        projection
+          .translate([evt.transform.x, evt.transform.y])
+          .scale(evt.transform.k);
+        d3.selectAll("path.graticule").attr("d", geoPath);
+        d3.selectAll("path.countries").attr("d", geoPath);
+        d3.selectAll("circle.cities")
+          .attr("cx", (d) => projection([d.x, d.y])[0])
+          .attr("cy", (d) => projection([d.x, d.y])[1]);
+      }
+
+      // button event handler
+      function zoomButton(zoomDirection) {
+        const width = 600;
+        const height = 600;
+        const newScale = zoomDirection === "in" ? 1.5 : 0.75;
+
+        const newZoom = projection.scale() * newScale;
+        // 需要重新计算 center
+        const newX =
+          (projection.translate()[0] - width / 2) * newScale + width / 2;
+        const newY =
+          (projection.translate()[1] - height / 2) * newScale + height / 2;
+
+        const newZoomSettings = d3.zoomIdentity
+          .translate(newX, newY)
+          .scale(newZoom);
+        svg.transition().duration(500).call(mapZoom.transform, newZoomSettings);
+      }
+      // draw buttons
+      d3.select("#controls")
+        .append("button")
+        .on("click", () => {
+          zoomButton("in");
+        })
+        .html("Zoom in");
+      d3.select("#controls")
+        .append("button")
+        .on("click", () => {
+          zoomButton("out");
+        })
+        .html("Zoom out");
     }
   });
 }
