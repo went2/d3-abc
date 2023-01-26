@@ -1,11 +1,85 @@
-// import { geoMollweide } from "https://cdn.skypack.dev/d3-geo-projection@4";
-
 function createMap() {
   Promise.all([
-    d3.json("../../data/world.geojson"),
+    d3.json("../../data/world.topojson"),
     d3.csv("../../data/cityies.csv"),
   ]).then(([countries, cities]) => {
     const svg = d3.select("svg");
+    // draw with topojson data
+    drawMap3(countries);
+    function drawMap3(topoCountries) {
+      const countries = topojson.feature(
+        topoCountries,
+        topoCountries.objects.countries
+      );
+      // console.log(topoCountries);
+      const projection = d3
+        .geoMollweide()
+        .scale(120)
+        .translate([300, 300])
+        .center([20, 0]);
+      const geoPath = d3.geoPath().projection(projection);
+      const featureSize = d3.extent(countries.features, (d) => geoPath.area(d));
+      const countryColor = d3
+        .scaleQuantize()
+        .domain(featureSize)
+        .range(colorbrewer.Reds[7]);
+      const graticule = d3.geoGraticule();
+      svg
+        .append("path")
+        .datum(graticule)
+        .attr("class", "graticule line")
+        .attr("d", geoPath);
+      svg
+        .append("path")
+        .datum(graticule.outline)
+        .attr("class", "graticule outline")
+        .attr("d", geoPath);
+      svg
+        .selectAll("path.countries")
+        .data(countries.features)
+        .enter()
+        .append("path")
+        .attr("d", geoPath)
+        .attr("class", "countries")
+        .style("fill", (d) => countryColor(geoPath.area(d)))
+        .style("stroke", "none");
+      mergeAt(0);
+      function mergeAt(mergePoint) {
+        const filteredCountries =
+          topoCountries.objects.countries.geometries.filter((d) => {
+            const thisCenter = d3.geoCentroid(
+              topojson.feature(topoCountries, d)
+            );
+            return thisCenter[1] > mergePoint ? true : null;
+          });
+        d3.select("svg")
+          .append("g")
+          .datum(topojson.merge(topoCountries, filteredCountries))
+          .insert("path")
+          .attr("class", "merged")
+          .attr("d", geoPath);
+      }
+
+      const neighbors = topojson.neighbors(
+        topoCountries.objects.countries.geometries
+      );
+      d3.selectAll("path.countries")
+        .on("mouseover", findNeighbors)
+        .on("mouseout", clearNeighbors);
+      function findNeighbors(event, d) {
+        const index = countries.features.findIndex(
+          (feature) => feature.id === d.id
+        );
+        console.log(d, countries, neighbors, index);
+        d3.select(this).style("fill", "#FE9922");
+        d3.selectAll("path.countries")
+          .filter((p, q) => neighbors[index].includes(q))
+          .style("fill", "#41A368");
+      }
+      function clearNeighbors() {
+        d3.selectAll("path.countries").style("fill", "#C4B9AC");
+      }
+    }
 
     // drawMercator();
 
@@ -36,7 +110,7 @@ function createMap() {
         .translate([300, 300])
         .center([0, 0]),
     };
-    drawMap("orthographic");
+    // drawMap("orthographic");
     function drawMap(projectionType = "mollweide") {
       drawCommonMap(projections[projectionType]);
     }
@@ -106,6 +180,14 @@ function createMap() {
         d3.selectAll("rect.bbox").remove();
       }
 
+      // 根据地区的地理面积设置颜色范围
+      const featureData = d3.selectAll("path.countries").data();
+      const realFearureSize = d3.extent(featureData, (d) => d3.geoArea(d));
+      const newFeatureColor = d3
+        .scaleQuantile()
+        .domain(realFearureSize)
+        .range(colorbrewer.Reds[7]);
+
       // 添加zoom
       const mapZoom = d3.zoom().on("zoom", zoomRotate);
       const zoomSettings = d3.zoomIdentity.translate(300, 300).scale(200);
@@ -135,7 +217,7 @@ function createMap() {
 
       let t = setInterval(() => {
         rotateGlobes(transformX, 200);
-        transformX += 5;
+        transformX += 2;
       }, 50);
 
       function rotateGlobes(transformX, transformK) {
@@ -147,7 +229,7 @@ function createMap() {
         d3.selectAll("path.graticule").attr("d", geoPath);
         d3.selectAll("path.countries")
           .attr("d", geoPath)
-          .style("fill", (d) => countryColor(geoPath.area(d)))
+          .style("fill", (d) => newFeatureColor(d3.geoArea(d)))
           .style("stroke", (d) =>
             d3.rgb(countryColor(geoPath.area(d))).darker()
           );
