@@ -19,13 +19,19 @@ appData.forEach((d, i) => {
 
 function App() {
   const [size, setSize] = useState({ width: 1000, height: 500 });
+  const [hoveredEle, setHoveredEle] = useState("none");
 
   function onResize() {
-    console.log("onresize");
+    // console.log("onresize");
     setSize({
       width: window.innerWidth,
       height: window.innerHeight - 70,
     });
+  }
+
+  function onHover(hoveredId) {
+    console.log("sethovered", hoveredId);
+    setHoveredEle(hoveredId);
   }
 
   useEffect(() => {
@@ -50,16 +56,22 @@ function App() {
           colorScale={colorScale}
           data={appData}
           size={[size.width, size.height / 2]}
+          hoverEle={hoveredEle}
+          onHover={onHover}
         />
         <WorldMap
           colorScale={colorScale}
           data={appData}
           size={[size.width * 0.48, size.height / 2]}
+          hoverEle={hoveredEle}
+          onHover={onHover}
         />
         <BarChart
           colorScale={colorScale}
           data={appData}
           size={[size.width * 0.48, size.height / 2]}
+          hoverEle={hoveredEle}
+          onHover={onHover}
         />
       </div>
     </div>

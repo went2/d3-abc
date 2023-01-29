@@ -5,7 +5,7 @@ import { geoMercator, geoPath } from "d3-geo";
 
 class WorldMap extends PureComponent {
   render() {
-    const { data, colorScale, size } = this.props;
+    const { data, colorScale, size, hoverEle, onHover } = this.props;
     const projection = geoMercator().scale(120).translate([430, 250]);
     const pathGenerator = geoPath().projection(projection);
     const countries = data.map((d, i) => (
@@ -13,8 +13,9 @@ class WorldMap extends PureComponent {
         key={"path" + i}
         d={pathGenerator(d)}
         className="countries"
+        onMouseEnter={() => onHover(d.id)}
         style={{
-          fill: colorScale(d.launchday),
+          fill: hoverEle === d.id ? "#fcbc34" : colorScale(d.launchday),
           stroke: "black",
           strokeOpacity: 0.5,
         }}
