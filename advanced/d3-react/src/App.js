@@ -1,13 +1,15 @@
 import "./App.css";
-import BarChart from "./components/BarChart";
-import WorldMap from "./components/WorldMap";
-import StreamGraph from "./components/StreamGraph";
 
 import worldData from "./data/world";
 import { range, sum } from "d3-array";
 import { scaleThreshold } from "d3-scale";
 import { geoCentroid } from "d3-geo";
 import { useEffect, useState } from "react";
+
+import BarChart from "./components/BarChart";
+import WorldMap from "./components/WorldMap";
+import StreamGraph from "./components/StreamGraph";
+import Brush from "./components/Brush";
 
 const appData = worldData.features.filter((d) => geoCentroid(d)[0] < -20);
 
@@ -30,7 +32,7 @@ function App() {
   }
 
   function onHover(hoveredId) {
-    console.log("sethovered", hoveredId);
+    // console.log("sethovered", hoveredId);
     setHoveredEle(hoveredId);
   }
 
@@ -59,6 +61,8 @@ function App() {
           hoverEle={hoveredEle}
           onHover={onHover}
         />
+        <Brush size={[size.width, 60]} />
+
         <WorldMap
           colorScale={colorScale}
           data={appData}
