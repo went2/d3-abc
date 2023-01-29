@@ -22,6 +22,7 @@ appData.forEach((d, i) => {
 function App() {
   const [size, setSize] = useState({ width: 1000, height: 500 });
   const [hoveredEle, setHoveredEle] = useState("none");
+  const [brushExtent, setBrushExtent] = useState([0, 40]);
 
   function onResize() {
     // console.log("onresize");
@@ -36,6 +37,10 @@ function App() {
     setHoveredEle(hoveredId);
   }
 
+  function onBrush(d) {
+    setBrushExtent(d);
+  }
+
   useEffect(() => {
     window.addEventListener("resize", onResize, false);
     // setWidth(window.innerWidth);
@@ -48,6 +53,10 @@ function App() {
     .domain([5, 10, 20, 30, 50])
     .range(["#75739F", "#5EAFC6", "#41A368", "#93C464", "#FE9922"]);
 
+  const filteredAppData = appData.filter(
+    (d, i) => d.launchday >= brushExtent[0] && d.launchday <= brushExtent[1]
+  );
+
   return (
     <div className="App">
       <header className="App-header">
@@ -56,23 +65,23 @@ function App() {
       <div>
         <StreamGraph
           colorScale={colorScale}
-          data={appData}
+          data={filteredAppData}
           size={[size.width, size.height / 2]}
           hoverEle={hoveredEle}
           onHover={onHover}
         />
-        <Brush size={[size.width, 60]} />
+        <Brush size={[size.width, 60]} changeBrush={onBrush} />
 
         <WorldMap
           colorScale={colorScale}
-          data={appData}
+          data={filteredAppData}
           size={[size.width * 0.48, size.height / 2]}
           hoverEle={hoveredEle}
           onHover={onHover}
         />
         <BarChart
           colorScale={colorScale}
-          data={appData}
+          data={filteredAppData}
           size={[size.width * 0.48, size.height / 2]}
           hoverEle={hoveredEle}
           onHover={onHover}

@@ -34,7 +34,7 @@ function Brush({ size, changeBrush }) {
     function brushed(event) {
       // brushed code
       const selectedExtent = event.selection.map((d) => scale.invert(d));
-      // brushFn(selectedExtent);
+      brushFn(selectedExtent);
     }
   }
 
