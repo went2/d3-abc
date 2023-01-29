@@ -10,6 +10,7 @@ import BarChart from "./components/BarChart";
 import WorldMap from "./components/WorldMap";
 import StreamGraph from "./components/StreamGraph";
 import Brush from "./components/Brush";
+import StatLine from "./components/StatLine";
 
 const appData = worldData.features.filter((d) => geoCentroid(d)[0] < -20);
 
@@ -60,8 +61,9 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h2>Dashboard demo in d3-in-action chapter 9</h2>
+        <h2>Dashboard demo in d3-in-action with interactivity</h2>
       </header>
+      <StatLine allData={appData} filteredData={filteredAppData} />
       <div>
         <StreamGraph
           colorScale={colorScale}
