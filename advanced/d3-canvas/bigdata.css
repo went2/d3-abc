@@ -1,0 +1,41 @@
+body,
+html {
+  margin: 0;
+}
+canvas {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+}
+svg {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+}
+path.country {
+  fill: #c4b9ac;
+  stroke-width: 1;
+  stroke: #4f442b;
+  opacity: 0.5;
+}
+path.sample {
+  stroke: #41a368;
+  stroke-width: 1px;
+  fill: #93c464;
+  fill-opacity: 0.5;
+}
+line.link {
+  stroke-width: 1px;
+  stroke: #4f442b;
+  stroke-opacity: 0.5;
+}
+circle.node {
+  fill: #93c464;
+  stroke: #ebd8c1;
+  stroke-width: 1px;
+}
+circle.xy {
+  fill: #fcbc34;
+  stroke: #fe9922;
+  stroke-width: 1px;
+}
